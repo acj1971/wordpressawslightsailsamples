@@ -3,12 +3,15 @@ services:
   mysql:
     image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
     ports:
       - "3306:3306"
+    secrets:
+      - mysql_root_password
+      - mysql_password
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -61,3 +64,10 @@ volumes:
 networks:
   wp-network:
     driver: overlay
+
+secrets:
+  mysql_root_password:
+    external: true  
+
+  mysql_password:
+    external: true     
