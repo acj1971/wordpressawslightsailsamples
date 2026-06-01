@@ -1,8 +1,7 @@
 services:
+
   mysql:
     image: mysql:latest
-    container_name: mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: wordpress
       MYSQL_DATABASE: wordpress
@@ -11,14 +10,16 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      -  mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
       - wp-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
   wordpress:
     image: wordpress:latest
-    container_name: wordpress
-    restart: always
     environment:
       WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_NAME: wordpress
@@ -28,16 +29,15 @@ services:
       - "80:80"
     volumes:
       - wp_html:/var/www/html
-    depends_on:
-      - mysql
     networks:
       - wp-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
   wpcli:
     image: wordpress:cli
-    container_name: wpcli
-    depends_on:
-      - wordpress
     entrypoint: wp
     working_dir: /var/www/html
     volumes:
@@ -49,6 +49,8 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress
     networks:
       - wp-network
+    deploy:
+      replicas: 0
 
 volumes:
   wp_html:
@@ -58,3 +60,4 @@ volumes:
 
 networks:
   wp-network:
+    driver: overlay
