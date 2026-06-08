@@ -3,10 +3,12 @@ services:
   mysql:
     image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      #MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_ROOT_PASSWORD: wordpress
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+    #  MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_PASSWORD: wordpress
     ports:
       - "3306:3306"
     secrets:
@@ -24,10 +26,16 @@ services:
   wordpress:
     image: wordpress:latest
     environment:
-      WORDPRESS_DB_HOST: mysql:3306
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
+       WORDPRESS_DB_HOST: mysql:3306
+       WORDPRESS_DB_NAME: wordpress
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
+       
+
+       WORDPRESS_DEBUG: 1
+      
+    secrets:
+      - mysql_password
     ports:
       - "80:80"
     volumes:
@@ -49,7 +57,9 @@ services:
       WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
+    secrets:
+      - mysql_password
     networks:
       - wp-network
     deploy:
@@ -63,11 +73,10 @@ volumes:
 
 networks:
   wp-network:
-    driver: overlay
+  # driver: overlay
 
 secrets:
   mysql_root_password:
-    external: true  
-
+    external: true
   mysql_password:
-    external: true     
+    external: true
