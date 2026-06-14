@@ -2,18 +2,18 @@ services:
 
   mysql:
     image: mysql:latest
+    
     environment:
-      #MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
-      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-    #  MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-      MYSQL_PASSWORD: wordpress
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
     ports:
       - "3306:3306"
     secrets:
-      - mysql_root_password
       - mysql_password
+      - mysql_root_password
+      
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -24,14 +24,15 @@ services:
         condition: on-failure
 
   wordpress:
+    depends_on:
+       - mysql
     image: wordpress:latest
     environment:
        WORDPRESS_DB_HOST: mysql:3306
        WORDPRESS_DB_NAME: wordpress
        WORDPRESS_DB_USER: wordpress
        WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
-       
-
+     
        WORDPRESS_DEBUG: 1
       
     secrets:
@@ -73,7 +74,7 @@ volumes:
 
 networks:
   wp-network:
-  # driver: overlay
+   driver: overlay
 
 secrets:
   mysql_root_password:
