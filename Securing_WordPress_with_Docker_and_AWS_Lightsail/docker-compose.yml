@@ -1,0 +1,82 @@
+services:
+  mysql:
+    image: mysql:latest
+    
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+    ports:
+      - "3306:3306"
+    secrets:
+      - mysql_password
+      - mysql_root_password
+      
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wp-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  wordpress:
+    depends_on:
+       - mysql
+    image: wordpress:latest
+    environment:
+       WORDPRESS_DB_HOST: mysql:3306
+       WORDPRESS_DB_NAME: wordpress
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
+     
+       WORDPRESS_DEBUG: 1
+      
+    secrets:
+      - mysql_password
+    ports:
+      - "80:80"
+    volumes:
+      - wp_html:/var/www/html
+    networks:
+      - wp-network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  wpcli:
+    image: wordpress:cli
+    entrypoint: wp
+    working_dir: /var/www/html
+    volumes:
+      - wp_html:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
+    secrets:
+      - mysql_password
+    networks:
+      - wp-network
+    deploy:
+      replicas: 0
+
+volumes:
+  wp_html:
+    external: true
+  mysql_data:
+    external: true
+
+networks:
+  wp-network:
+   driver: overlay
+
+secrets:
+  mysql_root_password:
+    external: true
+  mysql_password:
+    external: true
