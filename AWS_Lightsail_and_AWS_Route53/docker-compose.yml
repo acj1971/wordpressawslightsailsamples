@@ -58,6 +58,7 @@ services:
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
+      WP_SITEURL: "https://new.novuslogic.com"
     secrets:
       - mysql_password
     networks:
