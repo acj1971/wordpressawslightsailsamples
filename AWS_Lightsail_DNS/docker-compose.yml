@@ -31,8 +31,10 @@ services:
        WORDPRESS_DB_NAME: wordpress
        WORDPRESS_DB_USER: wordpress
        WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mysql_password
-       WP_SITEURL: "http://example.com"
-     
+        WORDPRESS_CONFIG_EXTRA: |
+          define( 'WP_HOME', 'http://example.com' );
+          define( 'WP_SITEURL', 'http://example.com' );
+
        WORDPRESS_DEBUG: 1
       
     secrets:
